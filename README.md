@@ -4,6 +4,7 @@ Program ma za zadanie pomóc w organizacji zjazdów z budowy. Zanan jest lokaliz
 Program na wyliczyć sam najbardziej optymalną konfigurację, wysłania określonych samochodów tak by każdy samochód zrobił jak najmniejszą ilość kilometrów.
 
 ANIA-2.0 powstała gdyż zawsze robiła to moja koleżanka Ania, teraz gdy ktoś inny musi to robić jest to zbyt skomplikowane stąd koniecznosć zaangażowania technologi.
+
 ################################################
 # Transport na budowie
 
@@ -26,6 +27,8 @@ Uwzględnia:
 
 ## Instalacja i uruchomienie
 
+
+
 ### Linux / macOS
 
 ```bash
@@ -33,4 +36,5 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install pandas openpyxl ortools streamlit requests
 streamlit run app.py
-<img width="1593" height="810" alt="image" src="https://github.com/user-attachments/assets/e71e7a16-74ed-48ac-8917-c2c94ffc10b8" />
+```
+![hej](/zrzut_ekranu_1.png)
