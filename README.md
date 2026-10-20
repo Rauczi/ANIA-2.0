@@ -33,3 +33,4 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install pandas openpyxl ortools streamlit requests
 streamlit run app.py
+<img width="1593" height="810" alt="image" src="https://github.com/user-attachments/assets/e71e7a16-74ed-48ac-8917-c2c94ffc10b8" />
