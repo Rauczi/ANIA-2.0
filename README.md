@@ -35,6 +35,7 @@ Uwzględnia:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install pandas openpyxl ortools streamlit requests
+pip install folium streamlit-folium
 streamlit run app.py
 ```
 ![hej](/zrzut_ekranu_1.png)
