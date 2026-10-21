@@ -1,0 +1,13 @@
+1.0 
+1.1 Co mam 21.10.2026
+✅ Aplikacja webowa z solverem OR-Tools
+
+✅ Przypisywanie kierowców do samochodów
+
+✅ Dwa tryby odległości: linia prosta i OSRM
+
+✅ Mapa z kolorowymi trasami dla każdego samochodu
+
+✅ Stabilna mapa (bez migotania)
+
+✅ Repozytorium na GitHubie z README
