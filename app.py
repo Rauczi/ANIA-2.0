@@ -3,10 +3,11 @@
 
 import math
 
-import requests
-
+import folium
 import pandas as pd
+import requests
 import streamlit as st
+from streamlit_folium import st_folium
 
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
@@ -20,6 +21,21 @@ def odleglosc(lat1, lon1, lat2, lon2):
          + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2))
          * math.sin(dlon / 2) ** 2)
     return 2 * R * math.asin(math.sqrt(a))
+
+
+def pobierz_macierz_osrm(punkty):
+    coords = ";".join(f"{lon},{lat}" for lat, lon in punkty)
+    url = f"http://router.project-osrm.org/table/v1/driving/{coords}?annotations=distance"
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        raise RuntimeError(f"Błąd OSRM: {e}")
+    if "distances" not in data:
+        raise RuntimeError(f"OSRM nie zwrócił macierzy: {data}")
+    return [[d / 1000.0 for d in row] for row in data["distances"]]
+
 
 def zbuduj_macierz(osoby, baza, uzyj_osrm=False):
     punkty = [(baza.iloc[0]["Lat"], baza.iloc[0]["Lon"])]
@@ -41,37 +57,28 @@ def zbuduj_macierz(osoby, baza, uzyj_osrm=False):
     return macierz
 
 
-
-
-def pobierz_macierz_osrm(punkty):
-    """Pobiera macierz odległości z OSRM (w km).
-    punkty: lista krotek (lat, lon).
-    """
-    # OSRM oczekuje lon,lat (odwrotnie niż my)
-    coords = ";".join(f"{lon},{lat}" for lat, lon in punkty)
-    url = f"http://router.project-osrm.org/table/v1/driving/{coords}?annotations=distance"
-
-    try:
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
-    except Exception as e:
-        raise RuntimeError(f"Błąd OSRM: {e}")
-
-    if "distances" not in data:
-        raise RuntimeError(f"OSRM nie zwrócił macierzy: {data}")
-
-    # OSRM zwraca metry — zamieniamy na km
-    macierz = [[d / 1000.0 for d in row] for row in data["distances"]]
-    return macierz
-
-
 def solve(macierz_km, miejsca, przypisania=None):
-    macierz = [[int(round(d * 1000)) for d in row] for row in macierz_km]
-    n = len(macierz)
+    """Rozwiązuje CVRP bez powrotu do bazy.
+
+    Dodajemy wirtualny węzeł końcowy (indeks n), do którego prowadzi koszt 0
+    z każdego punktu. Dzięki temu solver nie płaci za powrót, a trasa może
+    zakończyć się u ostatniego pasażera.
+    """
+    n_baz = len(macierz_km)
+
+    # Macierz rozszerzona o wirtualny koniec (indeks n_baz)
+    macierz = []
+    for row in macierz_km:
+        macierz.append([int(round(d * 1000)) for d in row] + [0])
+    macierz.append([0] * (n_baz + 1))
+
+    n = n_baz + 1  # +1 wirtualny koniec
     liczba_samochodow = len(miejsca)
 
-    manager = pywrapcp.RoutingIndexManager(n, liczba_samochodow, 0)
+    # Każda trasa startuje z 0 i kończy w wirtualnym węźle n_baz
+    manager = pywrapcp.RoutingIndexManager(
+        n, liczba_samochodow, [0] * liczba_samochodow, [n_baz] * liczba_samochodow
+    )
     routing = pywrapcp.RoutingModel(manager)
 
     def callback(from_index, to_index):
@@ -82,7 +89,7 @@ def solve(macierz_km, miejsca, przypisania=None):
 
     def demand_callback(from_index):
         node = manager.IndexToNode(from_index)
-        return 0 if node == 0 else 1
+        return 0 if node in (0, n_baz) else 1
 
     dcb = routing.RegisterUnaryTransitCallback(demand_callback)
     routing.AddDimensionWithVehicleCapacity(dcb, 0, miejsca, True, "Pojemnosc")
@@ -90,10 +97,7 @@ def solve(macierz_km, miejsca, przypisania=None):
     if przypisania:
         for osoba_idx, auto_idx in przypisania.items():
             node_index = manager.NodeToIndex(int(osoba_idx))
-            routing.solver().Add(
-                routing.VehicleVar(node_index) == int(auto_idx)
-            )
-
+            routing.solver().Add(routing.VehicleVar(node_index) == int(auto_idx))
 
     params = pywrapcp.DefaultRoutingSearchParameters()
     params.first_solution_strategy = (
@@ -109,9 +113,10 @@ def solve(macierz_km, miejsca, przypisania=None):
         index = routing.Start(v)
         trasa = []
         while not routing.IsEnd(index):
-            trasa.append(manager.IndexToNode(index))
+            node = manager.IndexToNode(index)
+            if node != n_baz:  # pomiń wirtualny koniec
+                trasa.append(node)
             index = solution.Value(routing.NextVar(index))
-        trasa.append(manager.IndexToNode(index))
         trasy.append(trasa)
     return trasy
 
@@ -138,12 +143,10 @@ if plik is not None:
     uzyj_osrm = st.checkbox("Użyj rzeczywistych tras drogowych (OSRM)", value=False)
 
     if st.button("Oblicz przydział"):
-        macierz = zbuduj_macierz(osoby, baza, uzyj_osrm=uzyj_osrm)
+        macierz_km = zbuduj_macierz(osoby, baza, uzyj_osrm=uzyj_osrm)
         miejsca = list(samochody["Miejsca"])
 
         przypisania = {}
-
-
         for i, row in osoby.iterrows():
             rej = str(row.get("Pojazd", "")).strip()
             if rej and rej.lower() != "nan":
@@ -153,7 +156,7 @@ if plik is not None:
                 else:
                     st.warning(f"Nie znaleziono samochodu o rejestracji: {rej}")
 
-        trasy = solve(macierz, miejsca, przypisania)
+        trasy = solve(macierz_km, miejsca, przypisania)
 
         if trasy is None:
             st.error("Nie znaleziono rozwiązania.")
@@ -161,12 +164,89 @@ if plik is not None:
             st.subheader("Wynik")
             for i, trasa in enumerate(trasy):
                 rej = samochody.iloc[i]["Rejestracja"]
-                osoby_w_trasie = [osoby.iloc[node - 1] for node in trasa if node != 0]
+                osoby_w_trasie = [node for node in trasa if node != 0]
                 with st.expander(f"Samochód {rej} — {len(osoby_w_trasie)} osób"):
                     if not osoby_w_trasie:
                         st.write("(brak osób)")
+                        continue
+
+                    lacznie = 0.0
+                    poprzedni = trasa[0]
+                    for krok, node in enumerate(trasa[1:], start=1):
+                        dystans = macierz_km[poprzedni][node]
+                        lacznie += dystans
+                        o = osoby.iloc[node - 1]
+                        kierowca = str(o.get("Pojazd", "")).strip() == rej
+                        znacznik = " 🚗 (kierowca)" if kierowca else ""
+                        st.write(
+                            f"  {krok}. {o['Imie']} {o['Nazwisko']}{znacznik}"
+                            f" — {dystans:.2f} km"
+                        )
+                        poprzedni = node
+
+                    st.write(f"**Łącznie: {lacznie:.2f} km**")
+
+            st.subheader("🗺️ Trasy na mapie")
+
+            punkty = [(baza.iloc[0]["Lat"], baza.iloc[0]["Lon"])]
+            for _, o in osoby.iterrows():
+                punkty.append((o["Lat"], o["Lon"]))
+
+            center_lat = sum(p[0] for p in punkty) / len(punkty)
+            center_lon = sum(p[1] for p in punkty) / len(punkty)
+
+            m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="OpenStreetMap")
+
+            folium.Marker(
+                location=[baza.iloc[0]["Lat"], baza.iloc[0]["Lon"]],
+                popup="Baza",
+                icon=folium.Icon(color="black", icon="home")
+            ).add_to(m)
+
+            kolory = ["red", "blue", "green", "purple", "orange", "darkred", "cadetblue"]
+
+            for i, trasa in enumerate(trasy):
+                if len(trasa) <= 1:
+                    continue
+
+                wspolrzedne = []
+                for node_idx in trasa:
+                    if node_idx == 0:
+                        lat, lon = baza.iloc[0]["Lat"], baza.iloc[0]["Lon"]
                     else:
-                        for o in osoby_w_trasie:
-                            kierowca = str(o.get("Pojazd", "")).strip() == rej
-                            znacznik = " 🚗 (kierowca)" if kierowca else ""
-                            st.write(f"- {o['Imie']} {o['Nazwisko']}{znacznik}")
+                        o = osoby.iloc[node_idx - 1]
+                        lat, lon = o["Lat"], o["Lon"]
+                    wspolrzedne.append(f"{lon},{lat}")
+
+                url = (
+                    "http://router.project-osrm.org/route/v1/driving/"
+                    + ";".join(wspolrzedne)
+                    + "?geometries=geojson&overview=full"
+                )
+                try:
+                    resp = requests.get(url, timeout=10)
+                    data = resp.json()
+                    if data.get("routes"):
+                        geom = data["routes"][0]["geometry"]["coordinates"]
+                        folium_coords = [[lat, lon] for lon, lat in geom]
+                        kolor = kolory[i % len(kolory)]
+                        folium.PolyLine(
+                            folium_coords,
+                            color=kolor,
+                            weight=4,
+                            opacity=0.7,
+                            tooltip=f"Samochód {samochody.iloc[i]['Rejestracja']}"
+                        ).add_to(m)
+                except Exception as e:
+                    st.warning(f"Nie udało się pobrać trasy dla samochodu {i+1}: {e}")
+
+            for _, o in osoby.iterrows():
+                folium.CircleMarker(
+                    location=[o["Lat"], o["Lon"]],
+                    radius=5,
+                    color="gray",
+                    fill=True,
+                    popup=f"{o['Imie']} {o['Nazwisko']}"
+                ).add_to(m)
+
+            st_folium(m, width=700, height=500, returned_objects=[])
