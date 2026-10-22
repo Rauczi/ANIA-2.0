@@ -4,6 +4,11 @@ Program ma za zadanie pomóc w organizacji zjazdów z budowy. Zanan jest lokaliz
 Program na wyliczyć sam najbardziej optymalną konfigurację, wysłania określonych samochodów tak by każdy samochód zrobił jak najmniejszą ilość kilometrów.
 
 ANIA-2.0 powstała gdyż zawsze robiła to moja koleżanka Ania, teraz gdy ktoś inny musi to robić jest to zbyt skomplikowane stąd koniecznosć zaangażowania technologi.
+Aktualizacja 0.1 22.10.2026
+dodano:
+
+* nie wymaga powrotu do bazy (samochód zostaje u ostatniego pasażera),
+* pokazuje numerowaną listę z dystansami i mapę z trasami.
 
 ################################################
 # Transport na budowie
