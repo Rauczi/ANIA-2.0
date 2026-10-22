@@ -33,9 +33,11 @@ Uwzględnia:
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
-pip install pandas openpyxl ortools streamlit requests
-pip install folium streamlit-folium
-streamlit run app.py
+1. source .venv/bin/activate
+2. pip install pandas openpyxl ortools streamlit requests
+3. pip install folium streamlit-folium
+4. streamlit run app.py
+
+- Do uruchomienia po pierwsze instalacji streamli wystarczy tylko punkt 1 i 4
 ```
 ![hej](/zrzut_ekranu_1.png)
