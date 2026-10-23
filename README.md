@@ -71,5 +71,6 @@ Windows:
 |       2.  python -m venv .venv
 |       3.  py -m streamlit run app.py --server.showEmailPrompt=False
 
-```
+````````````````````````````````````````````````````
+######### Przebitka z programu ##########
 ![hej](/zrzut_ekranu_1.png)
