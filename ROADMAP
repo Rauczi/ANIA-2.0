@@ -1,8 +1,11 @@
 1. Samochód nie wraca do bazy ! << Wykonane 22.10.2026
 2. Dodać przycisk aby wszystkie samochody były zajęte ,a gdy nie wcisnięty, optymalizacja do jak najmiejszej liczby samochodów
 3. Dodać kolory rozpisek samochodów na stronie w przeglądarce lub i opisy numeru samochodu przy liniach
-
-
+4. Zrobić by program uruchamiał się z jednego pliku
+      |
+      |Linux
+      |Windows
+5. Dodać instrukcję uruchamiania w Readme na Github
 
 
 
@@ -10,4 +13,4 @@
 
 Przyszłość:
 1. Lepszy routing
-2. Własny serwer routingu
+2. Własny serwer routingu offline
