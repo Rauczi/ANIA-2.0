@@ -34,15 +34,42 @@ Uwzględnia:
 
 
 
-### Linux / macOS
+### Linux / Windows
 
 ```bash
-python3 -m venv .venv
-1. source .venv/bin/activate
-2. pip install pandas openpyxl ortools streamlit requests
-3. pip install folium streamlit-folium
-4. streamlit run app.py
+Linux:
+| - Terminal Pierwsze uruchomienie
+|   Przechodzimy do folderu w którym mamy folder z programem:
+|       cd /ścieżka/do/ANIA-2.0
+|   Następnie instalujemy wszytskie potrzebne dodatki:
+|       1.  python3 -m venv .venv
+|       2.  source .venv/bin/activate
+|       3.  python -m pip install --upgrade pip
+|       4.  pip install pandas openpyxl ortools streamlit requests folium streamlit-folium
+|   Następnie uruchamiamy aplikację:
+|       streamlit run app.py
+|
+|
+|-  Kolejne Uruchamianie:
+|       1.  cd /ścieżka/do/ANIA-2.0
+|       2.  source .venv/bin/activate
+|       3.  streamlit run app.py
 
-- Do uruchomienia po pierwsze instalacji streamli wystarczy tylko punkt 1 i 4
+Windows:
+| - Powershell Pierwsze uruchomienie:
+|   Przechodzimy do folderu w którym mamy folder z programem:
+|       cd C:\ścieżka\do\ANIA-2.0
+|   Następnie instalujemy wszytskie potrzebne dodatki:
+|       1.  python -m venv .venv
+|       2.  .venv\Scripts\activate
+|       3.  pip install pandas openpyxl ortools streamlit requests
+|       4.  python -m pip install --upgrade pip
+|   Następnie uruchamiamy aplikację:
+|       py -m streamlit run app.py --server.showEmailPrompt=False
+|-  Kolejne Uruchamianie:
+|       1.  C:\ścieżka\do\ANIA-2.0
+|       2.  python -m venv .venv
+|       3.  py -m streamlit run app.py --server.showEmailPrompt=False
+
 ```
 ![hej](/zrzut_ekranu_1.png)
