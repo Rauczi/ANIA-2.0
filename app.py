@@ -273,7 +273,7 @@ with st.expander("ℹ️ O projekcie i licencji"):
     - **Distribution** — rozpowszechnianie
     - **Private use** — użytek prywatny
 
-    Kod źródłowy: [GitHub](https://github.com/Rauczi/ANIA-2.0/blob/main/app.py
+    Kod źródłowy: [GitHub](https://github.com/Rauczi/ANIA-2.0
     """)
 
 st.caption("Autor: Michał Smyrek. · Licencja MIT · commercial use, modification, distribution, private use")
