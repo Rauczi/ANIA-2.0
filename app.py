@@ -66,16 +66,14 @@ def solve(macierz_km, miejsca, przypisania=None):
     """
     n_baz = len(macierz_km)
 
-    # Macierz rozszerzona o wirtualny koniec (indeks n_baz)
     macierz = []
     for row in macierz_km:
         macierz.append([int(round(d * 1000)) for d in row] + [0])
     macierz.append([0] * (n_baz + 1))
 
-    n = n_baz + 1  # +1 wirtualny koniec
+    n = n_baz + 1
     liczba_samochodow = len(miejsca)
 
-    # Każda trasa startuje z 0 i kończy w wirtualnym węźle n_baz
     manager = pywrapcp.RoutingIndexManager(
         n, liczba_samochodow, [0] * liczba_samochodow, [n_baz] * liczba_samochodow
     )
@@ -114,7 +112,7 @@ def solve(macierz_km, miejsca, przypisania=None):
         trasa = []
         while not routing.IsEnd(index):
             node = manager.IndexToNode(index)
-            if node != n_baz:  # pomiń wirtualny koniec
+            if node != n_baz:
                 trasa.append(node)
             index = solution.Value(routing.NextVar(index))
         trasy.append(trasa)
@@ -162,29 +160,40 @@ if plik is not None:
             st.error("Nie znaleziono rozwiązania.")
         else:
             st.subheader("Wynik")
+            kolory = ["red", "blue", "green", "purple", "orange", "darkred", "cadetblue"]
+
             for i, trasa in enumerate(trasy):
                 rej = samochody.iloc[i]["Rejestracja"]
                 osoby_w_trasie = [node for node in trasa if node != 0]
-                with st.expander(f"Samochód {rej} — {len(osoby_w_trasie)} osób"):
-                    if not osoby_w_trasie:
-                        st.write("(brak osób)")
-                        continue
+                kolor = kolory[i % len(kolory)]
 
-                    lacznie = 0.0
-                    poprzedni = trasa[0]
-                    for krok, node in enumerate(trasa[1:], start=1):
-                        dystans = macierz_km[poprzedni][node]
-                        lacznie += dystans
-                        o = osoby.iloc[node - 1]
-                        kierowca = str(o.get("Pojazd", "")).strip() == rej
-                        znacznik = " 🚗 (kierowca)" if kierowca else ""
-                        st.write(
-                            f"  {krok}. {o['Imie']} {o['Nazwisko']}{znacznik}"
-                            f" — {dystans:.2f} km"
-                        )
-                        poprzedni = node
+                st.markdown(
+                    f"<div style='border-left: 6px solid {kolor}; "
+                    f"padding-left: 10px; margin-top: 12px;'>"
+                    f"<b>Samochód {rej}</b> — {len(osoby_w_trasie)} osób"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
 
-                    st.write(f"**Łącznie: {lacznie:.2f} km**")
+                if not osoby_w_trasie:
+                    st.write("(brak osób)")
+                    continue
+
+                lacznie = 0.0
+                poprzedni = trasa[0]
+                for krok, node in enumerate(trasa[1:], start=1):
+                    dystans = macierz_km[poprzedni][node]
+                    lacznie += dystans
+                    o = osoby.iloc[node - 1]
+                    kierowca = str(o.get("Pojazd", "")).strip() == rej
+                    znacznik = " 🚗 (kierowca)" if kierowca else ""
+                    st.write(
+                        f"  {krok}. {o['Imie']} {o['Nazwisko']}{znacznik}"
+                        f" — {dystans:.2f} km"
+                    )
+                    poprzedni = node
+
+                st.write(f"**Łącznie: {lacznie:.2f} km**")
 
             st.subheader("🗺️ Trasy na mapie")
 
@@ -202,8 +211,6 @@ if plik is not None:
                 popup="Baza",
                 icon=folium.Icon(color="black", icon="home")
             ).add_to(m)
-
-            kolory = ["red", "blue", "green", "purple", "orange", "darkred", "cadetblue"]
 
             for i, trasa in enumerate(trasy):
                 if len(trasa) <= 1:
@@ -250,3 +257,23 @@ if plik is not None:
                 ).add_to(m)
 
             st_folium(m, width=700, height=500, returned_objects=[])
+
+# --- Stopka: autor i licencja ---
+st.markdown("---")
+
+with st.expander("ℹ️ O projekcie i licencji"):
+    st.markdown("""
+    **Autor:** Michał S.
+
+    **Licencja:** MIT
+
+    Licencja MIT pozwala na:
+    - **Commercial use** — użycie komercyjne
+    - **Modification** — modyfikowanie kodu
+    - **Distribution** — rozpowszechnianie
+    - **Private use** — użytek prywatny
+
+    Kod źródłowy: [GitHub](https://github.com/Rauczi/ANIA-2.0/blob/main/app.py
+    """)
+
+st.caption("Autor: Michał Smyrek. · Licencja MIT · commercial use, modification, distribution, private use")
