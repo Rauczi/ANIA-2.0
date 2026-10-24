@@ -39,6 +39,10 @@ Uwzględnia:
 Należy pobrać plik dane_budowy.xlsx - uzupełnić go danymi i uruchomić poniży link
 https://ania-2pxe.streamlit.app/     - na każdym komputerze
 
+Lub uruchomienie poprzez pliki wykonywalne:
+start_Linux.sh < dla Linux
+start_Windows.bat < dla Windows
+
 ### Linux / Windows - konsola
 
 ```bash
