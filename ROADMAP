@@ -7,18 +7,19 @@
       |Windows << Wykonane 23.10.2026 << DO TESTU !!!!!!!!!!
 5. Dodać instrukcję uruchamiania w Readme na Github << Wykonane 23.10.2026
 6. Do strony w pzreglądarce dodac opis o licencji oraz o autorze << Wykonane 23.10.2026
-4. Zrobić by program wykonywalny uruchamiania z jednego pliku
+7. Zrobić by program wykonywalny uruchamiania z jednego pliku [-----]
       |
       |Linux
       |Windows
-
+8. Geokodowanie - zamiana adresów na współrzędne geolokalizayjne [-----]
+      
 
 
 
 Przyszłość:
-1. Lepszy routing
-2. Własny serwer routingu offline
+1. Lepszy routing [-----]
+2. Własny serwer routingu offline [-----]
 
 
 Pamiętać:
-1. Uzupełniać plik "Wersje"
+1. Uzupełniać plik "Wersje" - aktualnie na 24.10.2026
