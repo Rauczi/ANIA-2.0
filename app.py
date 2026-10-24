@@ -96,7 +96,7 @@ def zbuduj_macierz(osoby, baza, uzyj_osrm=False):
     return macierz
 
 
-def solve(macierz_km, miejsca, przypisania=None):
+def solve(macierz_km, miejsca, przypisania=None, wymus_wszystkie=False):
     """Rozwiązuje CVRP bez powrotu do bazy."""
     n_baz = len(macierz_km)
 
@@ -112,6 +112,13 @@ def solve(macierz_km, miejsca, przypisania=None):
         n, liczba_samochodow, [0] * liczba_samochodow, [n_baz] * liczba_samochodow
     )
     routing = pywrapcp.RoutingModel(manager)
+        # Kara za uruchomienie samochodu
+    if not wymus_wszystkie:
+        # Wysoka kara (np. 1000 km w metrach = 1 000 000) sprawi, że solver
+        # będzie upychał ludzi w mniej samochodów.
+        kara = 1000000
+        for v in range(liczba_samochodow):
+            routing.SetFixedCostOfVehicle(kara, v)
 
     def callback(from_index, to_index):
         return macierz[manager.IndexToNode(from_index)][manager.IndexToNode(to_index)]
@@ -159,9 +166,22 @@ st.title("🚗 Optymalizacja transportu osób na budowie")
 plik = st.file_uploader("Wgraj plik Excel (dane_budowa.xlsx)", type=["xlsx"])
 
 if plik is not None:
-    samochody = pd.read_excel(plik, sheet_name="Samochody")
-    osoby = pd.read_excel(plik, sheet_name="Osoby")
-    baza = pd.read_excel(plik, sheet_name="Baza")
+    try:
+        # Odczytaj wszystkie arkusze, ignorując wielkość liter i spacje w nazwach
+        xls = pd.ExcelFile(plik)
+        arkusze = {nazwa.strip().lower(): nazwa for nazwa in xls.sheet_names}
+
+        if "samochody" not in arkusze or "osoby" not in arkusze or "baza" not in arkusze:
+            st.error("Błąd: Plik Excel musi zawierać arkusze o nazwach: 'Samochody', 'Osoby' oraz 'Baza'.")
+            st.stop()
+
+        samochody = pd.read_excel(xls, sheet_name=arkusze["samochody"])
+        osoby = pd.read_excel(xls, sheet_name=arkusze["osoby"])
+        baza = pd.read_excel(xls, sheet_name=arkusze["baza"])
+
+    except Exception as e:
+        st.error(f"Nie udało się odczytać pliku Excel. Upewnij się, że plik nie jest otwarty w innym programie. Szczegóły: {e}")
+        st.stop()
 
     st.subheader("Dane wejściowe")
     col1, col2, col3 = st.columns(3)
@@ -173,6 +193,8 @@ if plik is not None:
     col3.dataframe(baza)
 
     uzyj_osrm = st.checkbox("Użyj rzeczywistych tras drogowych (OSRM)", value=False)
+
+    wymus_wszystkie = st.checkbox("Wymuś użycie wszystkich samochodów", value=False)
 
     if st.button("Oblicz przydział"):
         macierz_km = zbuduj_macierz(osoby, baza, uzyj_osrm=uzyj_osrm)
@@ -188,7 +210,7 @@ if plik is not None:
                 else:
                     st.warning(f"Nie znaleziono samochodu o rejestracji: {rej}")
 
-        trasy = solve(macierz_km, miejsca, przypisania)
+        trasy = solve(macierz_km,miejsca,przypisania,wymus_wszystkie=wymus_wszystkie)
 
         if trasy is None:
             st.error("Nie znaleziono rozwiązania.")
