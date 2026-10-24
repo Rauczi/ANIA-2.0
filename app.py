@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Interfejs webowy (Streamlit) do optymalizacji transportu."""
 
+import colorsys
 import math
 
 import folium
@@ -11,6 +12,44 @@ from streamlit_folium import st_folium
 
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+
+
+def generuj_kolory(n):
+    """Generuje n równomiernie rozłożonych kolorów w HEX (HSV -> RGB)."""
+    kolory = []
+    for i in range(n):
+        h = i / max(n, 1)
+        r, g, b = colorsys.hsv_to_rgb(h, 0.75, 0.85)
+        kolory.append(f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}")
+    return kolory
+
+
+def znajdz_emoji(hex_kolor):
+    """Dopasowuje najbliższe emoji koloru do koloru HEX."""
+    palety = [
+        ("🔴", (255, 0, 0)),
+        ("🔵", (0, 0, 255)),
+        ("🟢", (0, 255, 0)),
+        ("🟣", (128, 0, 128)),
+        ("🟠", (255, 165, 0)),
+        ("🟤", (139, 69, 19)),
+        ("🔷", (0, 128, 128)),
+        ("🟡", (255, 255, 0)),
+        ("🟣", (255, 0, 255)),
+    ]
+    h = hex_kolor.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+    najlepsze_emoji = "⚪"
+    najmniejsza_roznica = float("inf")
+
+    for emoji, (pr, pg, pb) in palety:
+        roznica = (r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2
+        if roznica < najmniejsza_roznica:
+            najmniejsza_roznica = roznica
+            najlepsze_emoji = emoji
+
+    return najlepsze_emoji
 
 
 def odleglosc(lat1, lon1, lat2, lon2):
@@ -58,12 +97,7 @@ def zbuduj_macierz(osoby, baza, uzyj_osrm=False):
 
 
 def solve(macierz_km, miejsca, przypisania=None):
-    """Rozwiązuje CVRP bez powrotu do bazy.
-
-    Dodajemy wirtualny węzeł końcowy (indeks n), do którego prowadzi koszt 0
-    z każdego punktu. Dzięki temu solver nie płaci za powrót, a trasa może
-    zakończyć się u ostatniego pasażera.
-    """
+    """Rozwiązuje CVRP bez powrotu do bazy."""
     n_baz = len(macierz_km)
 
     macierz = []
@@ -160,40 +194,42 @@ if plik is not None:
             st.error("Nie znaleziono rozwiązania.")
         else:
             st.subheader("Wynik")
-            kolory = ["red", "blue", "green", "purple", "orange", "darkred", "cadetblue"]
+            kolory = generuj_kolory(len(trasy))
 
             for i, trasa in enumerate(trasy):
                 rej = samochody.iloc[i]["Rejestracja"]
                 osoby_w_trasie = [node for node in trasa if node != 0]
-                kolor = kolory[i % len(kolory)]
+                kolor = kolory[i]
+                ikona = znajdz_emoji(kolor)
 
-                st.markdown(
-                    f"<div style='border-left: 6px solid {kolor}; "
-                    f"padding-left: 10px; margin-top: 12px;'>"
-                    f"<b>Samochód {rej}</b> — {len(osoby_w_trasie)} osób"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
+                naglowek = f"{ikona} {i + 1}. Samochód {rej} — {len(osoby_w_trasie)} osób"
 
-                if not osoby_w_trasie:
-                    st.write("(brak osób)")
-                    continue
-
-                lacznie = 0.0
-                poprzedni = trasa[0]
-                for krok, node in enumerate(trasa[1:], start=1):
-                    dystans = macierz_km[poprzedni][node]
-                    lacznie += dystans
-                    o = osoby.iloc[node - 1]
-                    kierowca = str(o.get("Pojazd", "")).strip() == rej
-                    znacznik = " 🚗 (kierowca)" if kierowca else ""
-                    st.write(
-                        f"  {krok}. {o['Imie']} {o['Nazwisko']}{znacznik}"
-                        f" — {dystans:.2f} km"
+                with st.expander(naglowek):
+                    st.markdown(
+                        f"<div style='border-left: 6px solid {kolor}; "
+                        f"height: 20px; margin-bottom: 8px;'></div>",
+                        unsafe_allow_html=True,
                     )
-                    poprzedni = node
 
-                st.write(f"**Łącznie: {lacznie:.2f} km**")
+                    if not osoby_w_trasie:
+                        st.write("(brak osób)")
+                        continue
+
+                    lacznie = 0.0
+                    poprzedni = trasa[0]
+                    for krok, node in enumerate(trasa[1:], start=1):
+                        dystans = macierz_km[poprzedni][node]
+                        lacznie += dystans
+                        o = osoby.iloc[node - 1]
+                        kierowca = str(o.get("Pojazd", "")).strip() == rej
+                        znacznik = " 🚗 (kierowca)" if kierowca else ""
+                        st.write(
+                            f"  {krok}. {o['Imie']} {o['Nazwisko']}{znacznik}"
+                            f" — {dystans:.2f} km"
+                        )
+                        poprzedni = node
+
+                    st.write(f"**Łącznie: {lacznie:.2f} km**")
 
             st.subheader("🗺️ Trasy na mapie")
 
@@ -236,12 +272,12 @@ if plik is not None:
                     if data.get("routes"):
                         geom = data["routes"][0]["geometry"]["coordinates"]
                         folium_coords = [[lat, lon] for lon, lat in geom]
-                        kolor = kolory[i % len(kolory)]
+                        kolor = kolory[i]
                         folium.PolyLine(
                             folium_coords,
                             color=kolor,
                             weight=4,
-                            opacity=0.7,
+                            opacity=0.8,
                             tooltip=f"Samochód {samochody.iloc[i]['Rejestracja']}"
                         ).add_to(m)
                 except Exception as e:
@@ -263,7 +299,7 @@ st.markdown("---")
 
 with st.expander("ℹ️ O projekcie i licencji"):
     st.markdown("""
-    **Autor:** Michał S. przy pomocy AI DeepSeek - https://chat.deepseek.com/
+    **Autor:** Michał Smyrek przy pomocy AI DeepSeek - https://chat.deepseek.com/
 
     **Licencja:** MIT
 
@@ -273,7 +309,7 @@ with st.expander("ℹ️ O projekcie i licencji"):
     - **Distribution** — rozpowszechnianie
     - **Private use** — użytek prywatny
 
-    Kod źródłowy: [GitHub](https://github.com/Rauczi/ANIA-2.0
+    Kod źródłowy: [GitHub](https://github.com/Rauczi/ANIA-2.0)
     """)
 
 st.caption("Autor: Michał Smyrek. · Licencja MIT · commercial use, modification, distribution, private use")
