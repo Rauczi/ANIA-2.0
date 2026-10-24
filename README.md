@@ -36,9 +36,9 @@ Uwzględnia:
 
 ## Instalacja i uruchomienie
 
+https://ania-2pxe.streamlit.app/     - na każdym ko pumputerze
 
-
-### Linux / Windows
+### Linux / Windows - konsola
 
 ```bash
 Linux:
