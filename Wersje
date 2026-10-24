@@ -1,12 +1,10 @@
 1.0 
 1.1 Co mam 24.10.2026
-✅ Czytanie danych z Excela (odporne na błędy i inne zakładki)
+✅ Czytanie danych z Excela (z obsługą błędów i dziwnych arkuszy)
 
 ✅ Przypisywanie kierowców do samochodów
 
-✅ Solver OR-Tools z limitem miejsc
-
-✅ Brak powrotu do bazy (samochód zostaje u ostatniego pasażera)
+✅ Solver OR-Tools (z limitem miejsc i bez powrotu do bazy)
 
 ✅ Dwa tryby odległości (linia prosta / OSRM)
 
@@ -18,6 +16,10 @@
 
 ✅ Spójne kolory (emoji + kreska + linia na mapie)
 
-✅ Eksport wyników do Excela (nowość!)
+✅ Eksport wyników do Excela
+
+✅ Pamięć stanu (cache na dysku) – dane nie znikają po F5
+
+✅ Przycisk do ręcznego czyszczenia cache
 
 ✅ Stopka z autorem i licencją
