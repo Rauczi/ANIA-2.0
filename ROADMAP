@@ -1,13 +1,16 @@
 1. Samochód nie wraca do bazy ! << Wykonane 22.10.2026
 2. Dodać przycisk aby wszystkie samochody były zajęte ,a gdy nie wcisnięty, optymalizacja do jak najmiejszej liczby samochodów
 3. Dodać kolory rozpisek samochodów na stronie w przeglądarce lub i opisy numeru samochodu przy liniach
-4. Zrobić by program uruchamiał się z jednego pliku
+4. Napisać instruckje uruchamiania z konsoli
       |
       |Linux << Wykonane 23.10.2026
       |Windows << Wykonane 23.10.2026 << DO TESTU !!!!!!!!!!
 5. Dodać instrukcję uruchamiania w Readme na Github << Wykonane 23.10.2026
 6. Do strony w pzreglądarce dodac opis o licencji oraz o autorze << Wykonane 23.10.2026
-
+4. Zrobić by program wykonywalny uruchamiania z jednego pliku
+      |
+      |Linux
+      |Windows
 
 
 
