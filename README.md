@@ -36,7 +36,8 @@ Uwzględnia:
 
 ## Instalacja i uruchomienie
 
-https://ania-2pxe.streamlit.app/     - na każdym ko pumputerze
+Należy pobrać plik dane_budowy.xlsx - uzupełnić go danymi i uruchomić poniży link
+https://ania-2pxe.streamlit.app/     - na każdym komputerze
 
 ### Linux / Windows - konsola
 
