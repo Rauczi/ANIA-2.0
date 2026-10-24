@@ -1,13 +1,23 @@
 1.0 
-1.1 Co mam 21.10.2026
-✅ Aplikacja webowa z solverem OR-Tools
+1.1 Co mam 24.10.2026
+✅ Czytanie danych z Excela (odporne na błędy i inne zakładki)
 
 ✅ Przypisywanie kierowców do samochodów
 
-✅ Dwa tryby odległości: linia prosta i OSRM
+✅ Solver OR-Tools z limitem miejsc
 
-✅ Mapa z kolorowymi trasami dla każdego samochodu
+✅ Brak powrotu do bazy (samochód zostaje u ostatniego pasażera)
 
-✅ Stabilna mapa (bez migotania)
+✅ Dwa tryby odległości (linia prosta / OSRM)
 
-✅ Repozytorium na GitHubie z README
+✅ Przełącznik: minimalna liczba aut vs. wszystkie auta
+
+✅ Numerowana lista z dystansami
+
+✅ Mapa z kolorowymi trasami
+
+✅ Spójne kolory (emoji + kreska + linia na mapie)
+
+✅ Eksport wyników do Excela (nowość!)
+
+✅ Stopka z autorem i licencją
