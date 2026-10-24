@@ -263,7 +263,7 @@ st.markdown("---")
 
 with st.expander("ℹ️ O projekcie i licencji"):
     st.markdown("""
-    **Autor:** Michał S.
+    **Autor:** Michał S. przy pomocy AI DeepSeek - https://chat.deepseek.com/
 
     **Licencja:** MIT
 
