@@ -26,6 +26,8 @@ Uwzględnia:
 - przypisanie kierowcy do konkretnego pojazdu (na stałe),
 - dwa tryby odległości: linia prosta lub rzeczywiste trasy drogowe (OSRM).
 - aplikacja generuje mapę z trasami, koloruje samochody i nie wymaga powrotu do bazy.
+- aplikacja zapamiętuje stan po odświeżeniu strony
+- działa eksport wyników do arkusza excel
 
 ## Wymagania
 
