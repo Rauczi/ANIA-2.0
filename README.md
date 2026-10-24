@@ -25,6 +25,7 @@ Uwzględnia:
 - liczbę miejsc w każdym samochodzie,
 - przypisanie kierowcy do konkretnego pojazdu (na stałe),
 - dwa tryby odległości: linia prosta lub rzeczywiste trasy drogowe (OSRM).
+- aplikacja generuje mapę z trasami, koloruje samochody i nie wymaga powrotu do bazy.
 
 ## Wymagania
 
