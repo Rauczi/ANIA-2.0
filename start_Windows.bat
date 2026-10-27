@@ -1,16 +1,41 @@
-Set-Location -Path $PSScriptRoot
+@echo off
+title Transport na budowie - Uruchamianie
+cd /d "%~dp0"
 
-if (-not (Test-Path ".venv\Scripts\streamlit.exe")) {
-    Write-Host "=== Pierwsze uruchomienie: tworzenie srodowiska i instalacja ==="
-    python -m venv .venv
-    & .venv\Scripts\Activate.ps1
+echo ===================================================
+echo   Sprawdzanie srodowiska...
+echo ===================================================
+
+:: 1. Sprawdz, czy istnieje srodowisko wirtualne (.venv)
+if not exist .venv (
+    echo [1/2] Tworzenie srodowiska wirtualnego...
+    py -m venv .venv
+) else (
+    echo [1/2] Srodowisko wirtualne juz istnieje. Pomijam.
+)
+
+:: 2. Aktywuj srodowisko
+call .venv\Scripts\activate.bat
+
+:: 3. Sprawdz WSZYSTKIE kluczowe biblioteki naraz
+echo Sprawdzanie bibliotek...
+py -c "import streamlit, pandas, openpyxl, ortools, requests, folium, streamlit_folium" >nul 2>&1
+
+if errorlevel 1 (
+    echo [2/2] Brakuje niektorych bibliotek. Instalowanie (to moze potrwac)...
     py -m pip install --upgrade pip
-    pip install pandas openpyxl ortools streamlit requests folium streamlit-folium
-} else {
-    Write-Host "=== Srodowisko juz istnieje, pomijam instalacje ==="
-    & .venv\Scripts\Activate.ps1
-}
+    pip install streamlit pandas openpyxl ortools requests folium streamlit-folium
+) else (
+    echo [2/2] Wszystkie biblioteki sa zainstalowane. Pomijam.
+)
 
-py -m streamlit run app.py --server.showEmailPrompt=False
+echo.
+echo ===================================================
+echo   Uruchamianie aplikacji...
+echo ===================================================
+echo.
+
+:: 4. Uruchom Streamlit
+streamlit run app.py
 
 pause
