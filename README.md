@@ -73,6 +73,7 @@ Windows:
 |       2.  .venv\Scripts\activate
 |       3.  pip install pandas openpyxl ortools streamlit requests
 |       4.  python -m pip install --upgrade pip
+|       5.  pip install folium streamlit-folium
 |   Następnie uruchamiamy aplikację:
 |       py -m streamlit run app.py --server.showEmailPrompt=False
 |-  Kolejne Uruchamianie:
