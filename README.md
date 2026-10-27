@@ -5,6 +5,7 @@ Program na wyliczyć sam najbardziej optymalną konfigurację, wysłania określ
 Można na sztywno przypisać daną osobę do samochodu przypisując przy niej w kolumnie numer rejestracyjny
 
 ANIA-2.0 powstała gdyż zawsze robiła to moja koleżanka Ania, teraz gdy ktoś inny musi to robić jest to zbyt skomplikowane stąd koniecznosć zaangażowania technologi.
+
 Aktualizacja 0.1 22.10.2026
 dodano:
 
