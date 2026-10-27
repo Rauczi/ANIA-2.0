@@ -78,7 +78,7 @@ Windows:
 |       py -m streamlit run app.py --server.showEmailPrompt=False
 |-  Kolejne Uruchamianie:
 |       1.  C:\ścieżka\do\ANIA-2.0
-|       2.  python -m venv .venv
+|       2.  py -m venv .venv
 |       3.  py -m streamlit run app.py --server.showEmailPrompt=False
 
 ````````````````````````````````````````````````````
