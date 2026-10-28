@@ -80,7 +80,8 @@ Windows:
 |-  Kolejne Uruchamianie:
 |       1.  C:\ścieżka\do\ANIA-2.0
 |       2.  py -m venv .venv
-|       3.  py -m streamlit run app.py --server.showEmailPrompt=False
+|       3.  .venv\Scripts\activate
+|       4.  py -m streamlit run app.py --server.showEmailPrompt=False
 
 ````````````````````````````````````````````````````
 ######### Przebitka z programu ##########
